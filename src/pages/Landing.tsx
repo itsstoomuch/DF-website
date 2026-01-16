@@ -18,7 +18,7 @@ const LOGO_WORDMARK = "/brand/df-wordmark.png";
 const LOGO_STAND = "/brand/df-stand.png";
 const LOGO_RUN = "/brand/df-run.png";
 
-/** Cursor-follow spotlight (desktop only recommended). */
+/** Desktop-only cursor spotlight (mobile gets none). */
 function CursorSpotlight() {
   const [pos, setPos] = useState({ x: 0, y: 0 });
   const [active, setActive] = useState(false);
@@ -64,46 +64,53 @@ function CursorSpotlight() {
   );
 }
 
-/** Background: grid + animated glow + beams + vignette + subtle grain. */
+/**
+ * Backdrop tuned:
+ * - Mobile: lighter/faster (no heavy animated blobs)
+ * - Desktop: full animated glows + beams
+ */
 function Backdrop() {
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden">
       <div className="absolute inset-0 bg-[#05070f]" />
 
-      {/* ambient glows */}
+      {/* Desktop-only heavy blobs */}
       <motion.div
-        className="absolute -top-52 left-1/2 h-[680px] w-[680px] -translate-x-1/2 rounded-full bg-blue-500/16 blur-3xl"
+        className="hidden md:block absolute -top-52 left-1/2 h-[680px] w-[680px] -translate-x-1/2 rounded-full bg-blue-500/16 blur-3xl"
         animate={{ opacity: [0.16, 0.3, 0.16], scale: [1, 1.05, 1] }}
         transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
       />
       <motion.div
-        className="absolute top-24 -left-56 h-[660px] w-[660px] rounded-full bg-sky-400/10 blur-3xl"
+        className="hidden md:block absolute top-24 -left-56 h-[660px] w-[660px] rounded-full bg-sky-400/10 blur-3xl"
         animate={{ opacity: [0.1, 0.22, 0.1], scale: [1, 1.03, 1] }}
         transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
       />
       <motion.div
-        className="absolute -bottom-64 right-[-180px] h-[740px] w-[740px] rounded-full bg-indigo-500/10 blur-3xl"
+        className="hidden md:block absolute -bottom-64 right-[-180px] h-[740px] w-[740px] rounded-full bg-indigo-500/10 blur-3xl"
         animate={{ opacity: [0.09, 0.2, 0.09], scale: [1, 1.04, 1] }}
         transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
       />
 
-      {/* grid */}
+      {/* Mobile-friendly static glow */}
+      <div className="md:hidden absolute -top-40 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-blue-500/12 blur-3xl" />
+
+      {/* Grid */}
       <div className="absolute inset-0 opacity-[0.06] [background-image:linear-gradient(to_right,rgba(255,255,255,0.9)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.9)_1px,transparent_1px)] [background-size:64px_64px]" />
 
-      {/* top spotlight */}
+      {/* Spotlight */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_12%,rgba(59,130,246,0.22),transparent_55%)]" />
 
-      {/* moving beam */}
+      {/* Desktop-only moving beam */}
       <motion.div
-        className="absolute inset-0 opacity-[0.14] [background:linear-gradient(115deg,transparent_30%,rgba(59,130,246,0.45)_48%,transparent_66%)]"
+        className="hidden md:block absolute inset-0 opacity-[0.14] [background:linear-gradient(115deg,transparent_30%,rgba(59,130,246,0.45)_48%,transparent_66%)]"
         animate={{ x: ["-22%", "22%", "-22%"] }}
         transition={{ duration: 11, repeat: Infinity, ease: "easeInOut" }}
       />
 
-      {/* vignette */}
+      {/* Vignette */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_30%,rgba(0,0,0,0.88)_76%)]" />
 
-      {/* grain */}
+      {/* Grain */}
       <div className="absolute inset-0 opacity-[0.06] mix-blend-overlay bg-[url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22400%22%3E%3Cfilter id=%22n%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.9%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22400%22 height=%22400%22 filter=%22url(%23n)%22 opacity=%220.45%22/%3E%3C/svg%3E')]" />
     </div>
   );
@@ -144,7 +151,7 @@ function FeatureCard({
   );
 }
 
-/** Shimmer block for “loading thumbnails / AI processing”. */
+/** Shimmer block (skeleton tile) */
 function ShimmerBlock({
   className = "",
   delayMs = 0,
@@ -161,7 +168,7 @@ function ShimmerBlock({
     >
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(59,130,246,0.18),transparent_55%)]" />
       <div
-        className="absolute inset-0 opacity-70 animate-[df_shimmer_1.8s_ease-in-out_infinite] [background:linear-gradient(110deg,transparent,rgba(255,255,255,0.07),transparent)]"
+        className="absolute inset-0 opacity-70 motion-safe:animate-[df_shimmer_1.8s_ease-in-out_infinite] [background:linear-gradient(110deg,transparent,rgba(255,255,255,0.07),transparent)]"
         style={{ animationDelay: `${delayMs}ms` }}
       />
     </div>
@@ -175,8 +182,7 @@ function AiMatchPanel() {
   );
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.045] p-5 backdrop-blur">
-      {/* header */}
+    <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.045] p-4 sm:p-5 backdrop-blur">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className="grid h-10 w-10 place-items-center rounded-2xl bg-blue-500/15 ring-1 ring-blue-400/20">
@@ -196,9 +202,9 @@ function AiMatchPanel() {
         </span>
       </div>
 
-      {/* “images” grid */}
-      <div className="relative mt-5 overflow-hidden rounded-2xl border border-white/10 bg-black/40">
-        <div className="grid grid-cols-3 gap-2 p-3">
+      <div className="relative mt-4 overflow-hidden rounded-2xl border border-white/10 bg-black/40">
+        {/* Mobile tweak: 2 cols on phones, 3 on sm+ */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 p-3">
           {delays.map((d, i) => (
             <ShimmerBlock key={i} delayMs={d} className="aspect-square" />
           ))}
@@ -207,23 +213,23 @@ function AiMatchPanel() {
         {/* scan */}
         <motion.div
           aria-hidden="true"
-          className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-blue-500/0 via-blue-400/25 to-blue-500/0 blur-sm"
+          className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-blue-500/0 via-blue-400/25 to-blue-500/0 blur-sm motion-safe:block"
           animate={{ y: ["-35%", "160%"] }}
           transition={{ duration: 2.35, repeat: Infinity, ease: "easeInOut" }}
         />
       </div>
 
-      {/* footer */}
-      <div className="mt-4 flex items-center justify-between text-xs text-white/65">
+      <div className="mt-3 flex items-center justify-between text-xs text-white/65">
         <span className="truncate">
-          Top match: <span className="text-white/85">“Black purse • main stage”</span>
+          Top match:{" "}
+          <span className="text-white/85">“Black purse • main stage”</span>
         </span>
         <span className="text-blue-300/80">92% confident</span>
       </div>
 
-      {/* match ping badge (no overlap) */}
+      {/* Desktop-only match ping badge (keeps mobile clean) */}
       <motion.div
-        className="pointer-events-none absolute right-4 top-[112px] hidden md:block"
+        className="pointer-events-none absolute right-4 top-[104px] hidden md:block"
         initial={{ opacity: 0, scale: 0.92, y: 6 }}
         whileInView={{ opacity: 1, scale: 1, y: 0 }}
         viewport={{ once: true, margin: "-120px" }}
@@ -252,11 +258,56 @@ function AiMatchPanel() {
     </div>
   );
 }
+function MobileAccordion({
+  items,
+}: {
+  items: { title: string; desc: string; icon?: React.ReactNode }[];
+}) {
+  const [open, setOpen] = useState<number | null>(0);
+
+  return (
+    <div className="md:hidden space-y-3">
+      {items.map((it, idx) => {
+        const isOpen = open === idx;
+        return (
+          <button
+            key={idx}
+            type="button"
+            onClick={() => setOpen(isOpen ? null : idx)}
+            className="w-full text-left rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3"
+          >
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                {it.icon ? (
+                  <div className="grid h-9 w-9 place-items-center rounded-xl bg-blue-500/12 ring-1 ring-blue-400/15">
+                    {it.icon}
+                  </div>
+                ) : null}
+                <div className="text-sm font-semibold text-white">{it.title}</div>
+              </div>
+
+              <div className="text-white/50 text-lg leading-none">
+                {isOpen ? "–" : "+"}
+              </div>
+            </div>
+
+            {isOpen ? (
+              <div className="mt-2 text-sm leading-6 text-white/70">
+                {it.desc}
+              </div>
+            ) : null}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 
 export default function Landing() {
   return (
-    <div className="min-h-screen text-white">
-      {/* Cursor spotlight sits above background but behind content */}
+    // Mobile tweak: prevent sideways scroll from glows
+    <div className="min-h-screen text-white overflow-x-hidden">
       <CursorSpotlight />
 
       <div className="relative">
@@ -264,12 +315,12 @@ export default function Landing() {
 
         {/* NAV */}
         <header className="relative z-10">
-          <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-5 md:px-6">
+          <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 md:px-6 md:py-5">
             <Link to="/" className="flex items-center gap-3">
               <img
                 src={LOGO_WORDMARK}
                 alt="DashFind.ai"
-                className="h-9 object-contain"
+                className="h-8 sm:h-9 object-contain"
               />
             </Link>
 
@@ -290,7 +341,7 @@ export default function Landing() {
 
             <a
               href="#waitlist"
-              className="inline-flex items-center gap-2 rounded-full bg-blue-500 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-400 hover:-translate-y-[1px] transition-transform"
+              className="inline-flex items-center gap-2 rounded-full bg-blue-500 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-400 hover:-translate-y-[1px] transition-transform"
             >
               Join waitlist <ArrowRight className="h-4 w-4" />
             </a>
@@ -299,7 +350,8 @@ export default function Landing() {
 
         {/* HERO */}
         <main className="relative z-10">
-          <div className="mx-auto grid max-w-6xl grid-cols-1 items-start gap-10 px-4 pb-14 pt-10 md:grid-cols-2 md:px-6 md:pb-20 md:pt-14">
+          {/* Mobile tweak: tighter spacing; desktop unchanged */}
+          <div className="mx-auto grid max-w-6xl grid-cols-1 items-start gap-8 px-4 pb-12 pt-8 md:grid-cols-2 md:gap-10 md:px-6 md:pb-20 md:pt-14">
             {/* left */}
             <div>
               <div className="flex flex-wrap gap-2">
@@ -308,7 +360,8 @@ export default function Landing() {
                 <Pill icon={Sparkles} text="AI matching" />
               </div>
 
-              <h1 className="mt-6 text-balance text-4xl font-semibold leading-tight md:text-5xl">
+              {/* Mobile tweak: better phone headline size; desktop stays same */}
+              <h1 className="mt-6 text-balance text-[34px] leading-[1.08] font-semibold sm:text-4xl md:text-5xl md:leading-tight">
                 Lost items. <span className="text-blue-300">Found faster</span>.
                 <br className="hidden md:block" />
                 Powered by people.{" "}
@@ -321,26 +374,26 @@ export default function Landing() {
                 with less chaos.
               </p>
 
-              <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
                 <a
                   href="#waitlist"
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-blue-500 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-400 hover:-translate-y-[1px] transition-transform"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-blue-500 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-400 hover:-translate-y-[1px] transition-transform"
                 >
                   Get early access <ArrowRight className="h-4 w-4" />
                 </a>
                 <Link
                   to="/contact"
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white/90 hover:bg-white/10 hover:-translate-y-[1px] transition-transform"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white/90 hover:bg-white/10 hover:-translate-y-[1px] transition-transform"
                 >
                   Partner / pilots
                 </Link>
               </div>
 
-              <div className="mt-7">
+              <div className="mt-6 md:mt-7">
                 <AiMatchPanel />
               </div>
 
-              <div className="mt-4 text-xs text-white/55">
+              <div className="mt-3 text-xs text-white/55">
                 Pre-launch: features shown are prototypes. Shipping in phases.
               </div>
             </div>
@@ -353,9 +406,9 @@ export default function Landing() {
                 initial={{ opacity: 0, y: 18 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.65, ease: "easeOut" }}
-                className="relative overflow-hidden rounded-[44px] border border-white/10 bg-gradient-to-b from-white/10 to-white/5 p-6 shadow-[0_20px_80px_-30px_rgba(59,130,246,0.55)]"
+                className="relative overflow-hidden rounded-[44px] border border-white/10 bg-gradient-to-b from-white/10 to-white/5 p-4 sm:p-6 shadow-[0_20px_80px_-30px_rgba(59,130,246,0.55)]"
               >
-                <div className="rounded-[34px] border border-white/10 bg-black/55 p-6">
+                <div className="rounded-[34px] border border-white/10 bg-black/55 p-4 sm:p-6">
                   <div className="text-sm font-semibold text-white">
                     A safer way to reconnect items
                   </div>
@@ -365,7 +418,7 @@ export default function Landing() {
                   </div>
 
                   <motion.div
-                    className="mt-6 flex items-center justify-center"
+                    className="mt-5 sm:mt-6 flex items-center justify-center"
                     animate={{ y: [0, -7, 0] }}
                     transition={{
                       duration: 4.6,
@@ -376,11 +429,11 @@ export default function Landing() {
                     <img
                       src={LOGO_STAND}
                       alt="DashFind mascot"
-                      className="w-full max-w-[340px] object-contain opacity-95"
+                      className="w-full max-w-[320px] sm:max-w-[340px] object-contain opacity-95"
                     />
                   </motion.div>
 
-                  <div className="mt-6 grid grid-cols-2 gap-3">
+                  <div className="mt-5 sm:mt-6 grid grid-cols-2 gap-3">
                     <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
                       <div className="text-xs text-white/60">Near you</div>
                       <div className="mt-1 text-sm font-semibold text-white">
@@ -403,103 +456,152 @@ export default function Landing() {
 
           {/* HOW */}
           <motion.section
-            id="how"
-            className="mx-auto max-w-6xl px-4 py-14 md:px-6"
-            initial={{ opacity: 0, y: 18 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-120px" }}
-            transition={{ duration: 0.55, ease: "easeOut" }}
-          >
-            <div className="mx-auto mb-10 max-w-2xl text-center">
-              <div className="mb-3 text-xs font-semibold tracking-widest text-blue-300/80">
-                HOW IT WORKS
-              </div>
-              <h2 className="text-balance text-3xl font-semibold text-white md:text-4xl">
-                Three steps. Less drama.
-              </h2>
-              <p className="mt-3 text-pretty text-sm leading-6 text-white/70 md:text-base">
-                Post what you found or what you lost. DashFind suggests likely
-                matches and keeps contact safer.
-              </p>
-            </div>
+  id="how"
+  className="mx-auto max-w-6xl px-4 py-10 md:px-6 md:py-14"
+  initial={{ opacity: 0, y: 18 }}
+  whileInView={{ opacity: 1, y: 0 }}
+  viewport={{ once: true, margin: "-120px" }}
+  transition={{ duration: 0.55, ease: "easeOut" }}
+>
+  <div className="mx-auto mb-7 max-w-2xl text-center md:mb-10">
+    <div className="mb-3 text-xs font-semibold tracking-widest text-blue-300/80">
+      HOW IT WORKS
+    </div>
+    <h2 className="text-balance text-3xl font-semibold text-white md:text-4xl">
+      Three steps. Less drama.
+    </h2>
+    <p className="mt-3 text-pretty text-sm leading-6 text-white/70 md:text-base">
+      Post what you found or what you lost. DashFind suggests likely matches and keeps contact safer.
+    </p>
+  </div>
 
-            <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
-              <FeatureCard
-                icon={Camera}
-                title="Post a report"
-                desc="Add a photo, a simple description, and where it happened. Found or lost—both work."
-              />
-              <FeatureCard
-                icon={Sparkles}
-                title="AI suggests matches"
-                desc="We compare images + text + time + location to surface likely matches (not noise)."
-              />
-              <FeatureCard
-                icon={ShieldCheck}
-                title="Verify & connect"
-                desc="Confirm ownership details before meeting or sharing contact details."
-              />
-            </div>
-          </motion.section>
+  {/* Mobile: compact accordion (short scroll) */}
+  <MobileAccordion
+    items={[
+      {
+        title: "Post a report",
+        desc: "Add a photo, a simple description, and where it happened. Found or lost—both work.",
+        icon: <Camera className="h-4 w-4 text-blue-300" />,
+      },
+      {
+        title: "AI suggests matches",
+        desc: "We compare images + text + time + location to surface likely matches (not noise).",
+        icon: <Sparkles className="h-4 w-4 text-blue-300" />,
+      },
+      {
+        title: "Verify & connect",
+        desc: "Confirm ownership details before meeting or sharing contact details.",
+        icon: <ShieldCheck className="h-4 w-4 text-blue-300" />,
+      },
+    ]}
+  />
+
+  {/* Desktop: keep your original cards */}
+  <div className="hidden md:grid grid-cols-3 gap-5">
+    <FeatureCard
+      icon={Camera}
+      title="Post a report"
+      desc="Add a photo, a simple description, and where it happened. Found or lost—both work."
+    />
+    <FeatureCard
+      icon={Sparkles}
+      title="AI suggests matches"
+      desc="We compare images + text + time + location to surface likely matches (not noise)."
+    />
+    <FeatureCard
+      icon={ShieldCheck}
+      title="Verify & connect"
+      desc="Confirm ownership details before meeting or sharing contact details."
+    />
+  </div>
+</motion.section>
+
 
           {/* FEATURES */}
           <motion.section
-            id="features"
-            className="border-t border-white/10 bg-black/20"
-            initial={{ opacity: 0, y: 18 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-120px" }}
-            transition={{ duration: 0.55, ease: "easeOut" }}
-          >
-            <div className="mx-auto max-w-6xl px-4 py-16 md:px-6">
-              <div className="mx-auto mb-10 max-w-2xl text-center">
-                <div className="mb-3 text-xs font-semibold tracking-widest text-blue-300/80">
-                  FEATURES
-                </div>
-                <h2 className="text-balance text-3xl font-semibold text-white md:text-4xl">
-                  Built for events, campuses, and cities
-                </h2>
-                <p className="mt-3 text-pretty text-sm leading-6 text-white/70 md:text-base">
-                  A utility app should feel invisible—until you need it. Then it
-                  should feel like a superpower.
-                </p>
-              </div>
+  id="features"
+  className="border-t border-white/10 bg-black/20"
+  initial={{ opacity: 0, y: 18 }}
+  whileInView={{ opacity: 1, y: 0 }}
+  viewport={{ once: true, margin: "-120px" }}
+  transition={{ duration: 0.55, ease: "easeOut" }}
+>
+  <div className="mx-auto max-w-6xl px-4 py-10 md:px-6 md:py-16">
+    <div className="mx-auto mb-7 max-w-2xl text-center md:mb-10">
+      <div className="mb-3 text-xs font-semibold tracking-widest text-blue-300/80">
+        FEATURES
+      </div>
+      <h2 className="text-balance text-3xl font-semibold text-white md:text-4xl">
+        Built for events, campuses, and cities
+      </h2>
+      <p className="mt-3 text-pretty text-sm leading-6 text-white/70 md:text-base">
+        A utility app should feel invisible—until you need it. Then it should feel like a superpower.
+      </p>
+    </div>
 
-              <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                <FeatureCard
-                  icon={MapPin}
-                  title="Location-aware search"
-                  desc="Filter by venue/campus/neighborhood. Find the right feed fast."
-                />
-                <FeatureCard
-                  icon={Search}
-                  title="Smart descriptions"
-                  desc="Describe it normally. We handle synonyms and “close enough” wording."
-                />
-                <FeatureCard
-                  icon={ShieldCheck}
-                  title="Trust-first flow"
-                  desc="Designed to reduce scams and false claims before contact is shared."
-                />
-                <FeatureCard
-                  icon={Users}
-                  title="Community signals"
-                  desc="Helpful users earn trust over time. Good people, rewarded."
-                />
-              </div>
-            </div>
-          </motion.section>
+    {/* Mobile: accordion */}
+    <MobileAccordion
+      items={[
+        {
+          title: "Location-aware search",
+          desc: "Filter by venue/campus/neighborhood. Find the right feed fast.",
+          icon: <MapPin className="h-4 w-4 text-blue-300" />,
+        },
+        {
+          title: "Smart descriptions",
+          desc: "Describe it normally. We handle synonyms and “close enough” wording.",
+          icon: <Search className="h-4 w-4 text-blue-300" />,
+        },
+        {
+          title: "Trust-first flow",
+          desc: "Designed to reduce scams and false claims before contact is shared.",
+          icon: <ShieldCheck className="h-4 w-4 text-blue-300" />,
+        },
+        {
+          title: "Community signals",
+          desc: "Helpful users earn trust over time. Good people, rewarded.",
+          icon: <Users className="h-4 w-4 text-blue-300" />,
+        },
+      ]}
+    />
+
+    {/* Desktop: keep your original grid */}
+    <div className="hidden md:grid grid-cols-2 gap-5">
+      <FeatureCard
+        icon={MapPin}
+        title="Location-aware search"
+        desc="Filter by venue/campus/neighborhood. Find the right feed fast."
+      />
+      <FeatureCard
+        icon={Search}
+        title="Smart descriptions"
+        desc="Describe it normally. We handle synonyms and “close enough” wording."
+      />
+      <FeatureCard
+        icon={ShieldCheck}
+        title="Trust-first flow"
+        desc="Designed to reduce scams and false claims before contact is shared."
+      />
+      <FeatureCard
+        icon={Users}
+        title="Community signals"
+        desc="Helpful users earn trust over time. Good people, rewarded."
+      />
+    </div>
+  </div>
+</motion.section>
+
 
           {/* WAITLIST */}
           <motion.section
             id="waitlist"
-            className="mx-auto max-w-6xl px-4 py-16 md:px-6"
+            className="mx-auto max-w-6xl px-4 py-14 md:px-6 md:py-16"
             initial={{ opacity: 0, y: 18 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-120px" }}
             transition={{ duration: 0.55, ease: "easeOut" }}
           >
-            <div className="mx-auto mb-10 max-w-2xl text-center">
+            <div className="mx-auto mb-9 max-w-2xl text-center md:mb-10">
               <div className="mb-3 text-xs font-semibold tracking-widest text-blue-300/80">
                 PRE-LAUNCH
               </div>
@@ -507,11 +609,12 @@ export default function Landing() {
                 Join the waitlist
               </h2>
               <p className="mt-3 text-pretty text-sm leading-6 text-white/70 md:text-base">
-                Early access, pilot invites, and first access to community features.
+                Early access, pilot invites, and first access to community
+                features.
               </p>
             </div>
 
-            <div className="mx-auto max-w-2xl rounded-3xl border border-white/10 bg-white/[0.04] p-6 md:p-8">
+            <div className="mx-auto max-w-2xl rounded-3xl border border-white/10 bg-white/[0.04] p-5 sm:p-6 md:p-8">
               <form
                 onSubmit={(e) => e.preventDefault()}
                 className="flex flex-col gap-3 sm:flex-row"
@@ -541,7 +644,7 @@ export default function Landing() {
 
           {/* FOOTER */}
           <footer className="border-t border-white/10 bg-black/30">
-            <div className="mx-auto max-w-6xl px-4 py-12 md:px-6">
+            <div className="mx-auto max-w-6xl px-4 py-10 md:px-6 md:py-12">
               <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
                 <div className="flex items-center gap-3">
                   <img
@@ -568,7 +671,8 @@ export default function Landing() {
               </div>
 
               <div className="mt-8 text-xs text-white/50">
-                © {new Date().getFullYear()} Syneidisi Tech Private Limited. All rights reserved.
+                © {new Date().getFullYear()} Syneidisi Tech Private Limited. All
+                rights reserved.
               </div>
             </div>
           </footer>
