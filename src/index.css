@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+html, body {
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+@keyframes df_shine {
+  0% { transform: translateX(-140%); }
+  100% { transform: translateX(140%); }
+}
+@keyframes df_shine {
+  0% { transform: translateX(-140%); }
+  100% { transform: translateX(140%); }
+}
+
+@keyframes df_shimmer {
+  0% { transform: translateX(-120%); }
+  100% { transform: translateX(120%); }
+}
+@keyframes df_shimmer {
+  0% { transform: translateX(-140%); }
+  100% { transform: translateX(140%); }
+}
